@@ -1,0 +1,22 @@
+version: "2"
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    network_mode: "host"
+    ports:
+      - "5671:5671"
+      - "5672:5672"
+      - "4369:4369"
+      - "25672:25672"
+      - "15671:15671"
+      - "15672:15672"
+  zipkin:
+    image: openzipkin/zipkin
+    network_mode: "host"
+    ports:
+      - "9411:9411"
+  consul:
+    image: consul
+    network_mode: "host"
+    ports:
+      - "8500:8500"
