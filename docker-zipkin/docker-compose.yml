@@ -45,7 +45,7 @@ services:
   #
   # For more details, see https://github.com/openzipkin/docker-zipkin-dependencies
   dependencies:
-    image: openzipkin/zipkin-dependencies
+    image: kswapd/zipkin-dependencies
     container_name: dependencies
     entrypoint: crond -f
     environment:
