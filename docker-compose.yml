@@ -20,3 +20,15 @@ services:
     network_mode: "host"
     ports:
       - "8500:8500"
+  influxdb:
+    image: influxdb 
+    network_mode: "host"
+    volumes:
+      - /home/kxw/dev/influxdb_data:/var/lib/influxdb
+    ports:
+      - "8086:8086"
+  zookeeper:
+    image: zookeeper 
+    network_mode: "host"
+    ports:
+      - "2181:2181"
