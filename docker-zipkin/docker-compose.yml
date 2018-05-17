@@ -45,7 +45,7 @@ services:
   #
   # For more details, see https://github.com/openzipkin/docker-zipkin-dependencies
   dependencies:
-    image: kswapd/zipkin-dependencies
+    image: openzipkin/zipkin-dependencies
     container_name: dependencies
     entrypoint: crond -f
     environment:
@@ -54,10 +54,11 @@ services:
       # Add the baked-in username and password for the zipkin-mysql image
       - MYSQL_USER=zipkin
       - MYSQL_PASS=zipkin
+
       # Uncomment to see dependency processing logs
       # - ZIPKIN_LOG_LEVEL=DEBUG
       # Uncomment to adjust memory used by the dependencies job
-      # - JAVA_OPTS=-verbose:gc -Xms1G -Xmx1G
+      - JAVA_OPTS=-Xms512m -Xmx1G -Djava.security.egd=file:/dev/./urandom 
     depends_on:
       - storage
   prometheus:
