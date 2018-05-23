@@ -15,4 +15,27 @@ services:
       - "7687:7687"
     volumes:
       - /home/kxw/dev/neo4j_data:/data
+  cassandra:
+    image: cassandra
+    network_mode: "bridge"
+    ports:
+      - "9160:9160"
+      - "9042:9042"
+        #hbase:
+        #image: harisekhon/hbase
+        #network_mode: "bridge"
+    #ports:
+    #  - "9160:9160"
+    #volumes:
+    #  - /home/kxw/dev/hbase_data:/hbase-data
+  opentsdb:
+    image: petergrace/opentsdb-docker 
+    network_mode: "bridge"
+    ports:
+      - "60030:60030"
+      - "4242:4242"
+    volumes:
+      - /home/kxw/dev/opentsdb_data:/data/hbase
+
+ 
    
