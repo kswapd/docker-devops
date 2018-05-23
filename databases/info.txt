@@ -7,3 +7,5 @@ docker exec -ti af28fef9f3cb hbase shell
 opentsdb:
 telnet 127.0.0.1 4242
 or web ui: http://ip:4242
+insert cpu load data:
+nohup ./import-data-to-opentsdb.sh &
