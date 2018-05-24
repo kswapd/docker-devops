@@ -36,6 +36,16 @@ services:
       - "4242:4242"
     volumes:
       - /home/kxw/dev/opentsdb_data:/data/hbase
+  graphite:
+    image: graphiteapp/graphite-statsd
+    network_mode: "bridge"
+    ports:
+      - "4243:80"
+      - "2003-2004:2003-2004"
+      - "2023-2024:2023-2024"
+      - "8125:8125/udp"
+      - "8126:8126"
+
 
  
    

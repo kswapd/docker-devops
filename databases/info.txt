@@ -9,3 +9,7 @@ telnet 127.0.0.1 4242
 or web ui: http://ip:4242
 insert cpu load data:
 nohup ./import-data-to-opentsdb.sh &
+add cpu percentage:
+get metrics from opentsdb:
+stress -c 1
+http://10.88.2.112:4242/api/query?start=1h-ago&m=sum:proc.loadavg.5m
