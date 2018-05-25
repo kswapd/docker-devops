@@ -1,0 +1,19 @@
+FROM       centos_jdk:7.4
+
+MAINTAINER taodw <taodw@dcits.com>
+
+ENV TZ "Asia/Shanghai"
+ENV TERM xterm
+
+RUN mkdir /soft 
+
+ADD dubbo-demo /soft/dubbo-demo
+
+
+
+EXPOSE 22
+EXPOSE 20980
+
+
+
+ENTRYPOINT exec java -jar /soft/dubbo-demo/dubbo-provider/target/dubbo-provider-1.0-SNAPSHOT.jar

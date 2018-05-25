@@ -45,7 +45,8 @@ services:
       - "2023-2024:2023-2024"
       - "8125:8125/udp"
       - "8126:8126"
-
-
- 
-   
+        #prometheus:
+        #image: prom/prometheus
+        #network_mode: "bridge"
+        #ports:
+        #- "9090:9090"

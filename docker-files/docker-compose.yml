@@ -1,0 +1,7 @@
+version: "2"
+services:
+  dubbo-demo:
+    image: kswapd/dubbo-provider:0.1
+    network_mode: "bridge"
+    ports:
+      - "20980:20980"
