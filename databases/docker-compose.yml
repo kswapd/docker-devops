@@ -2,11 +2,22 @@ version: "2"
 services:
   influxdb:
     image: influxdb 
-    network_mode: "host"
+    network_mode: "bridge"
     volumes:
       - /home/kxw/dev/influxdb_data:/var/lib/influxdb
     ports:
       - "8086:8086"
+      - "8083:8083"
+    environment:
+      - INFLUXDB_ADMIN_ENABLED=true
+  chronograf:
+    image: quay.io/influxdb/chronograf:1.5.0.0
+    network_mode: "bridge"
+    ports:
+      - "8888:8888"
+    #command:
+    #  - influxdb-url=http://localhost:8086
+
   neo4j: 
     image: neo4j 
     network_mode: "bridge"
