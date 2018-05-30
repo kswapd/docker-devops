@@ -4,4 +4,7 @@ services:
     image: kswapd/dubbo-provider:0.1
     network_mode: "bridge"
     ports:
-      - "20980:20980"
+      - "20981:20980"
+    environment:
+      - DUBBO_IP_TO_REGISTRY=10.88.2.100
+      - DUBBO_PORT_TO_REGISTRY=20981
