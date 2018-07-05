@@ -1,0 +1,12 @@
+version: "2"
+services:
+  ibmjava:
+    image: ibmjava:latest
+    network_mode: "bridge"
+    #volumes:
+    #  - /home/kxw/datas/ibmjava_data:/opt/apps
+    #ports:
+    #  - "8086:8086"
+    #  - "8083:8083"
+    #environment:
+    #  - INFLUXDB_ADMIN_ENABLED=true

@@ -1,7 +1,7 @@
 cassandra:
 docker exec -ti b205ccfc6476 cqlsh
 influx:
-docker exec -ti 0dca7b92e7c8 influx
+docker exec -ti 0dca7b92e7c8 influx -precision rfc3339
 hbase:
 docker exec -ti af28fef9f3cb hbase shell
 opentsdb:

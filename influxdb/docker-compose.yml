@@ -4,7 +4,7 @@ services:
     image: influxdb:1.5.2 
     network_mode: "bridge"
     volumes:
-      - /home/kxw/dev/influxdb_data:/var/lib/influxdb
+      - /home/kxw/datas/influxdb_data:/var/lib/influxdb
       - /home/kxw/dev/docker-devops/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     ports:
       - "8086:8086"
