@@ -12,20 +12,32 @@ services:
     image: openzipkin/zipkin-elasticsearch6:2.6
     container_name: elasticsearch
     # Uncomment to expose the storage port for testing
+    network_mode: "bridge"
     ports:
       - 9200:9200
 
   # Switch storage type to Elasticsearch
   zipkin:
-    image: openzipkin/zipkin:2.6
+    image: openzipkin/zipkin:2.8
+    #image: openzipkin/zipkin
+    network_mode: "bridge"
+    ports:
+      - "9411:9411"
     environment:
       - STORAGE_TYPE=elasticsearch
       # Point the zipkin at the storage backend
       - ES_HOSTS=elasticsearch
       # Uncomment to see requests to and from elasticsearch
-      # - ES_HTTP_LOGGING=BODY
-
   dependencies:
+    image: openzipkin/zipkin-dependencies
+    container_name: dependencies
+    entrypoint: crond -f
     environment:
       - STORAGE_TYPE=elasticsearch
-      - ES_HOSTS=elasticsearch
+      - ES_HOSTS=elasticsearch    # - ES_HTTP_LOGGING=BODY
+      # Uncomment to see dependency processing logs
+      # - ZIPKIN_LOG_LEVEL=DEBUG
+      # Uncomment to adjust memory used by the dependencies job
+      - JAVA_OPTS=-Xms512m -Xmx1G -Djava.security.egd=file:/dev/./urandom 
+    depends_on:
+      - storage

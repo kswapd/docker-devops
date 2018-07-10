@@ -1,0 +1,7 @@
+version: "2"
+services:
+  zookeeper:
+    image: zookeeper 
+    network_mode: "bridge"
+    ports:
+      - "2181:2181"
