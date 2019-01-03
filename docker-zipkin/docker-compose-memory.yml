@@ -1,7 +1,7 @@
 version: "2"
 services:
   zipkin:
-    image: openzipkin/zipkin:2.8
+    image: openzipkin/zipkin:2.11.12
     network_mode: "bridge"
     ports:
       - "9411:9411"
