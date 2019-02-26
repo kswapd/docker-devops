@@ -1,0 +1,36 @@
+version: "2"
+services:
+  zookeeper:
+    image: zookeeper 
+    network_mode: "bridge"
+    ports:
+      - "3181:2181"
+  elasticsearch:
+    image: elasticsearch:5.6
+    network_mode: "bridge"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+  redis:
+    image: redis:4.0
+    network_mode: "bridge"
+    ports:
+      - "6379:6379"
+  kafka:
+    image: wurstmeister/kafka:2.11-1.1.1
+    network_mode: "bridge"
+    ports:
+      - "9092:9092"
+    links:
+      - zookeeper:zk
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.117
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zk:2181
+  eureka:
+    image: springcloud/eureka
+    network_mode: "bridge"
+    ports:
+      - "8761:8761"
