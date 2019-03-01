@@ -1,7 +1,17 @@
 version: "2"
+#todo influxdb&logstash&filebeat
 services:
+  nginx:
+    image: nginx:1.15 
+    network_mode: "bridge"
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
   zookeeper:
-    image: zookeeper 
+    image: zookeeper:3.4
     network_mode: "bridge"
     ports:
       - "3181:2181"
@@ -29,8 +39,9 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: 10.88.2.117
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zk:2181
-  eureka:
-    image: springcloud/eureka
-    network_mode: "bridge"
-    ports:
-      - "8761:8761"
+  #Disable eureka, as if eureka server version is uncompatible with eureka client, client will report discovery heartbeat error."  
+  #eureka:
+  #  image: springcloud/eureka
+  #  network_mode: "bridge"
+  #  ports:
+  #    - "8761:8761"
