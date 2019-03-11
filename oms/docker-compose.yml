@@ -36,9 +36,25 @@ services:
     links:
       - zookeeper:zk
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.117
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.109
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zk:2181
+  influxdb:
+    image: influxdb:1.5.2 
+    network_mode: "bridge"
+    volumes:
+      - /home/kxw/datas/influxdb_data:/var/lib/influxdb
+      - /home/kxw/dev/docker-devops/oms/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+    ports:
+      - "8086:8086"
+      - "8083:8083"
+    environment:
+      - INFLUXDB_ADMIN_ENABLED=true
+  chronograf:
+    image: quay.io/influxdb/chronograf:1.5.0.0
+    network_mode: "bridge"
+    ports:
+      - "8888:8888"
   #Disable eureka, as if eureka server version is uncompatible with eureka client, client will report discovery heartbeat error."  
   #eureka:
   #  image: springcloud/eureka
