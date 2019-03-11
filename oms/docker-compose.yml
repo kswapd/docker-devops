@@ -9,7 +9,6 @@ services:
       - "8000:8000"
     volumes:
       - ./nginx/html:/usr/share/nginx/html
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
   zookeeper:
     image: zookeeper:3.4
     network_mode: "bridge"
@@ -17,12 +16,19 @@ services:
       - "3181:2181"
   elasticsearch:
     image: elasticsearch:5.6
+    #image: elasticsearch:2.4.4
     network_mode: "bridge"
     ports:
       - "9200:9200"
       - "9300:9300"
+    volumes:
+      - /home/kxw/dev/docker-devops/oms/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
-      - discovery.type=single-node
+      #- discovery.type=single-node
+      #- cluster.name=elasticsearch
+      - transport.host=0.0.0.0
+      - http.host=0.0.0.0
+      - discovery.zen.minimum_master_nodes=1
   redis:
     image: redis:4.0
     network_mode: "bridge"
