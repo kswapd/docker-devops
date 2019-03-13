@@ -1,0 +1,4 @@
+path.config: /usr/share/logstash/pipeline
+pipeline.batch.size: 500
+pipeline.output.workers: 16
+xpack.monitoring.enabled: false

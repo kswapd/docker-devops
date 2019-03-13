@@ -1,0 +1,32 @@
+	{
+	  "template" : "galaxy-batch-*",
+	  "settings" : {
+		"index.refresh_interval" : "5s",
+		"index.max_result_window": "100000000"
+	  },
+	  "mappings" : {
+		"galaxy-batch" : {
+		  "properties" : {
+			"@timestamp": { "type": "date", "format": "strict_date_optional_time||epoch_millis" },
+			"@version": { "type": "string", "index": "not_analyzed" },
+			"className": { "type": "string" },
+			"host": { "type": "string", "index": "not_analyzed"},
+			"platformId": { "type": "string", "index": "not_analyzed"  },
+			"runDate": { "type": "string", "index": "not_analyzed"   },
+			"messageCode": { "type": "string", "index": "not_analyzed"  },
+			"channelSeqNo": { "type": "string", "index": "not_analyzed"   },
+			"reference": { "type": "string", "index": "not_analyzed"  },
+			"logLevel": { "type": "string", "index": "not_analyzed"  },
+			"message": { "type": "string" },
+			"threadCode": { "type": "string" },
+			"type": { "type": "string" },
+                        "lastRunDate": {"type": "string" },
+                        "jobId": { "type": "string"},
+                        "jodbTaskId": { "type": "string"},
+                        "jodStartKey": { "type": "string"},
+                        "jodEndKey": { "type": "string" },
+                        "logdate": { "type": "string" }
+		  }
+		}
+	  }
+	}

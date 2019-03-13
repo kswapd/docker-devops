@@ -25,12 +25,12 @@ services:
       - "9300:9300"
     volumes:
       - /home/kxw/dev/docker-devops/oms/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    environment:
+    #environment:
       #- discovery.type=single-node
       #- cluster.name=elasticsearch
-      - transport.host=0.0.0.0
-      - http.host=0.0.0.0
-      - discovery.zen.minimum_master_nodes=1
+      #- transport.host=0.0.0.0
+      #- http.host=0.0.0.0
+      #- discovery.zen.minimum_master_nodes=1
   redis:
     image: redis:4.0
     network_mode: "bridge"
@@ -58,11 +58,36 @@ services:
       - "8083:8083"
     environment:
       - INFLUXDB_ADMIN_ENABLED=true
-  chronograf:
-    image: quay.io/influxdb/chronograf:1.5.0.0
+  logstash-online:
+    image: docker.elastic.co/logstash/logstash:5.6.8
     network_mode: "bridge"
+    volumes:
+      - ./logstash/logstash-online/galaxy-online.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/logstash-online/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/logstash-online/es-template/galaxy-online-template.json:/usr/share/logstash/es-template/galaxy-online-template.json
+    #environment:
+      #- PATH_CONFIG=/usr/share/logstash/pipeline 
+      #- XPACK_MONITORING_ENABLED=false
+    links:
+      - elasticsearch:es
     ports:
-      - "8888:8888"
+      - "10515:10515"
+  logstash-batch:
+    image: docker.elastic.co/logstash/logstash:5.6.8
+    network_mode: "bridge"
+    volumes:
+      - ./logstash/logstash-batch/galaxy-batch.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/logstash-batch/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/logstash-batch/es-template/galaxy-batch-template.json:/usr/share/logstash/es-template/galaxy-batch-template.json
+    links:
+      - elasticsearch:es
+    ports:
+      - "10516:10516"
+  #chronograf:
+    #image: quay.io/influxdb/chronograf:1.5.0.0
+    #network_mode: "bridge"
+    #ports:
+    #  - "8888:8888"
   #Disable eureka, as if eureka server version is uncompatible with eureka client, client will report discovery heartbeat error."  
   #eureka:
   #  image: springcloud/eureka

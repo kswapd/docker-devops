@@ -1,0 +1,23 @@
+version: "2"
+services:
+  logstash-online:
+    image: docker.elastic.co/logstash/logstash:5.6.8
+    network_mode: "bridge"
+    volumes:
+      - ./logstash/logstash-online/galaxy-online.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/logstash-online/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/logstash-online/es-template/galaxy-online-template.json:/usr/share/logstash/es-template/galaxy-online-template.json
+    #environment:
+      #- PATH_CONFIG=/usr/share/logstash/pipeline 
+      #- XPACK_MONITORING_ENABLED=false
+    ports:
+      - "10515:10515"
+  logstash-batch:
+    image: docker.elastic.co/logstash/logstash:5.6.8
+    network_mode: "bridge"
+    volumes:
+      - ./logstash/logstash-batch/galaxy-batch.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/logstash-batch/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/logstash-batch/es-template/galaxy-batch-template.json:/usr/share/logstash/es-template/galaxy-batch-template.json
+    ports:
+      - "10516:10516"
