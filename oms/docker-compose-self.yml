@@ -1,0 +1,37 @@
+version: "2"
+networks:
+  oms_oms-net:
+    external: true
+services:
+  eureka:
+    image: oms-eureka:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    ports:
+      - "9527:9527"
+  gateway:
+    image: oms-gateway:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    depends_on:
+      - eureka 
+    ports:
+      - "8081:8081"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+  auth:
+    image: oms-auth:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    depends_on:
+      - eureka 
+    ports:
+      - "8085:8085"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_mysql_1:oms.storage-mysql-server
+      - oms_redis_1:oms.cache-redis-server

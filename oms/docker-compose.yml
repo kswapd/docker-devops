@@ -1,30 +1,51 @@
 version: "2"
 #todo influxdb&logstash&filebeat
+networks:
+  oms-net:
+    driver: bridge
 services:
   nginx:
     image: nginx:1.15 
-    network_mode: "bridge"
+    #network_mode: "bridge"
     ports:
       - "8080:8080"
       - "8000:8000"
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - oms-net
+  mysql:
+    image: mysql:5.7.25
+    volumes:
+      - /home/kxw/datas/mysql_data:/var/lib/mysql
+      - ./mysql:/etc/mysql/conf.d
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=000000 
+    ports:
+      - "3307:3306"
+    networks:
+      - oms-net
 
   zookeeper:
     image: zookeeper:3.4
-    network_mode: "bridge"
+    #network_mode: "bridge"
     ports:
       - "3181:2181"
+    networks:
+      - oms-net
   elasticsearch:
     image: elasticsearch:5.6
     #image: elasticsearch:2.4.4
-    network_mode: "bridge"
+    #network_mode: "bridge"
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
       - /home/kxw/dev/docker-devops/oms/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - oms-net
     #environment:
       #- discovery.type=single-node
       #- cluster.name=elasticsearch
@@ -33,23 +54,25 @@ services:
       #- discovery.zen.minimum_master_nodes=1
   redis:
     image: redis:4.0
-    network_mode: "bridge"
+    #network_mode: "bridge"
     ports:
       - "6379:6379"
+    networks:
+      - oms-net
   kafka:
     image: wurstmeister/kafka:2.11-1.1.1
-    network_mode: "bridge"
+    #network_mode: "bridge"
     ports:
       - "9092:9092"
     links:
       - zookeeper:zk
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.105
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.107
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zk:2181
   influxdb:
     image: influxdb:1.5.2 
-    network_mode: "bridge"
+    #network_mode: "bridge"
     volumes:
       - /home/kxw/datas/influxdb_data:/var/lib/influxdb
       - /home/kxw/dev/docker-devops/oms/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
@@ -58,9 +81,11 @@ services:
       - "8083:8083"
     environment:
       - INFLUXDB_ADMIN_ENABLED=true
+    networks:
+      - oms-net
   logstash-online:
     image: docker.elastic.co/logstash/logstash:5.6.8
-    network_mode: "bridge"
+    #network_mode: "bridge"
     volumes:
       - ./logstash/logstash-online/galaxy-online.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/logstash-online/pipeline:/usr/share/logstash/pipeline
@@ -72,9 +97,11 @@ services:
       - elasticsearch:es
     ports:
       - "10515:10515"
+    networks:
+      - oms-net
   logstash-batch:
     image: docker.elastic.co/logstash/logstash:5.6.8
-    network_mode: "bridge"
+    #network_mode: "bridge"
     volumes:
       - ./logstash/logstash-batch/galaxy-batch.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/logstash-batch/pipeline:/usr/share/logstash/pipeline
@@ -83,6 +110,8 @@ services:
       - elasticsearch:es
     ports:
       - "10516:10516"
+    networks:
+      - oms-net
   #chronograf:
     #image: quay.io/influxdb/chronograf:1.5.0.0
     #network_mode: "bridge"
@@ -94,3 +123,34 @@ services:
   #  network_mode: "bridge"
   #  ports:
   #    - "8761:8761"
+  eureka:
+    image: oms-eureka:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net
+    ports:
+      - "9527:9527"
+  gateway:
+    image: oms-gateway:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net
+    depends_on:
+      - eureka 
+    ports:
+      - "8081:8081"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+  auth:
+    image: oms-auth:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net
+    depends_on:
+      - eureka 
+    ports:
+      - "8085:8085"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+      - mysql:oms.storage-mysql-server
+      - redis:oms.cache-redis-server
