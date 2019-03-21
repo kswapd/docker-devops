@@ -16,18 +16,14 @@ services:
   nginx:
     image: nginx:1.15 
     #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - gateway
-    links:
-      - gateway:oms.gateway-server
     ports:
       - "8080:8080"
       - "8000:8000"
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - oms-net
   mysql:
     image: mysql:5.7.25
     volumes:
@@ -50,17 +46,17 @@ services:
       - oms-net
   elasticsearch:
     image: elasticsearch:5.6
+    #image: elasticsearch:2.4.4
     #network_mode: "bridge"
-    networks:
-      - oms-net
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
-      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - /home/kxw/datas/es_data:/usr/share/elasticsearch/data
-    environment:
-      - discovery.type=single-node
+      - /home/kxw/dev/docker-devops/oms/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - oms-net
+    #environment:
+      #- discovery.type=single-node
       #- cluster.name=elasticsearch
       #- transport.host=0.0.0.0
       #- http.host=0.0.0.0
@@ -84,7 +80,7 @@ services:
     links:
       - zookeeper:zk
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.112
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.107
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zk:2181
   influxdb:
@@ -92,7 +88,7 @@ services:
     #network_mode: "bridge"
     volumes:
       - /home/kxw/datas/influxdb_data:/var/lib/influxdb
-      - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - /home/kxw/dev/docker-devops/oms/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
     ports:
       - "8086:8086"
       - "8083:8083"
@@ -110,8 +106,6 @@ services:
     #environment:
       #- PATH_CONFIG=/usr/share/logstash/pipeline 
       #- XPACK_MONITORING_ENABLED=false
-    depends_on:
-      - elasticsearch
     links:
       - elasticsearch:es
     ports:
@@ -125,8 +119,6 @@ services:
       - ./logstash/logstash-batch/galaxy-batch.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/logstash-batch/pipeline:/usr/share/logstash/pipeline
       - ./logstash/logstash-batch/es-template/galaxy-batch-template.json:/usr/share/logstash/es-template/galaxy-batch-template.json
-    depends_on:
-      - elasticsearch
     links:
       - elasticsearch:es
     ports:
@@ -145,14 +137,14 @@ services:
   #  ports:
   #    - "8761:8761"
   eureka:
-    image: kswapd/oms-eureka:1.0
+    image: oms-eureka:1.0
     #network_mode: "bridge"
     networks:
       - oms-net
     ports:
       - "9527:9527"
   gateway:
-    image: kswapd/oms-gateway:1.0
+    image: oms-gateway:1.0
     #network_mode: "bridge"
     networks:
       - oms-net
@@ -163,7 +155,7 @@ services:
     links:
       - eureka:oms.service-discovery-eureka-server
   auth:
-    image: kswapd/oms-auth:1.0
+    image: oms-auth:1.0
     #network_mode: "bridge"
     networks:
       - oms-net
@@ -175,105 +167,3 @@ services:
       - eureka:oms.service-discovery-eureka-server
       - mysql:oms.storage-mysql-server
       - redis:oms.cache-redis-server
-  alarm:
-    image: kswapd/oms-alarm:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - eureka 
-      - mysql
-    ports:
-      - "8092:8092"
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - mysql:oms.storage-mysql-server
-  log-server:
-    image: kswapd/oms-log-server:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - eureka 
-      - mysql
-      - elasticsearch
-    ports:
-      - "8093:8093"
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - elasticsearch:oms.storage-elasticsearch-server
-      - gateway:oms.gateway-server
-  monitor-server:
-    image: kswapd/oms-monitor-server:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - alarm
-      - eureka 
-      - mysql
-      - gateway
-      - kafka
-      - influxdb
-
-    ports:
-      - "8014:8014"
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - gateway:oms.gateway-server
-      - kafka:oms.mq-kafka-server
-      - influxdb:oms.storage-influxdb-server
-      - alarm:oms.alarm-server
-  deploy-server:
-    image: kswapd/oms-deploy:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - eureka 
-      - mysql
-      - gateway
-      - kafka
-    ports:
-      - "8012:8012"
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - gateway:oms.gateway-server
-      - mysql:oms.storage-mysql-server
-      - kafka:oms.mq-kafka-server
-  opeation-server:
-    image: kswapd/oms-operation:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - eureka 
-      - mysql
-      - gateway
-      - kafka
-    ports:
-      - "9679:9679"
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - gateway:oms.gateway-server
-      - mysql:oms.storage-mysql-server
-      - kafka:oms.mq-kafka-server
-  zipkin-server:
-    image: kswapd/oms-zipkin-server:1.0
-    #network_mode: "bridge"
-    networks:
-      - oms-net
-    depends_on:
-      - eureka 
-      - mysql
-      - gateway
-      - elasticsearch
-    ports:
-      - "9411:9411"
-    #links:
-    #  - eureka:oms.service-discovery-eureka-server
-    links:
-      - eureka:oms.service-discovery-eureka-server
-      - gateway:oms.gateway-server
-      - mysql:oms.storage-mysql-server
-      - elasticsearch:oms.storage-elasticsearch-server
