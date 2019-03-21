@@ -1,0 +1,127 @@
+version: "2"
+networks:
+  oms-net-business:
+    driver: bridge
+services:
+  alarm:
+    image: kswapd/oms-alarm:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    #depends_on:
+    #  - eureka
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+    ports:
+      - "8092:8092"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  log-server:
+    image: kswapd/oms-log-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    #depends_on:
+    #  - eureka 
+    ports:
+      - "8093:8093"
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  monitor-server:
+    image: kswapd/oms-monitor-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    depends_on:
+      - alarm
+    ports:
+      - "8014:8014"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+      - "oms.mq-kafka-server:10.7.20.205"
+      - "oms.storage-influxdb-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  deploy-server:
+    image: kswapd/oms-deploy:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    ports:
+      - "8012:8012"
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+      - "oms.mq-kafka-server:10.7.20.205"
+      - "oms.storage-influxdb-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  opeation-server:
+    image: kswapd/oms-operation:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    ports:
+      - "9679:9679"
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+      - "oms.mq-kafka-server:10.7.20.205"
+      - "oms.storage-influxdb-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  zipkin-server:
+    image: kswapd/oms-zipkin-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    #depends_on:
+    #  - alarm
+    ports:
+      - "9411:9411"
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+      - "oms.mq-kafka-server:10.7.20.205"
+      - "oms.storage-influxdb-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206
+  zipkin-server-dependency:
+    image: kswapd/oms-zipkin-server-dependency:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net-business
+    extra_hosts:
+      - "oms.service-discovery-eureka-server:10.7.20.205"
+      - "oms.storage-mysql-server:10.7.20.205"
+      - "oms.storage-elasticsearch-server:10.7.20.205"
+      - "oms.gateway-server:10.7.20.205"
+      - "oms.mq-kafka-server:10.7.20.205"
+      - "oms.storage-influxdb-server:10.7.20.205"
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.7.20.206

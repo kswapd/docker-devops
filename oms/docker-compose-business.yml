@@ -1,0 +1,104 @@
+version: "2"
+networks:
+  oms_oms-net:
+    external: true
+services:
+  alarm:
+    image: kswapd/oms-alarm:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    #depends_on:
+    #  - eureka 
+    ports:
+      - "8092:8092"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_mysql_1:oms.storage-mysql-server
+      - oms_gateway_1:oms.gateway-server
+  log-server:
+    image: kswapd/oms-log-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    #depends_on:
+    #  - eureka 
+    ports:
+      - "8093:8093"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_elasticsearch_1:oms.storage-elasticsearch-server
+      - oms_gateway_1:oms.gateway-server
+  monitor-server:
+    image: kswapd/oms-monitor-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    depends_on:
+      - alarm
+    ports:
+      - "8014:8014"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_gateway_1:oms.gateway-server
+      - oms_kafka_1:oms.mq-kafka-server
+      - oms_influxdb_1:oms.storage-influxdb-server
+  deploy-server:
+    image: kswapd/oms-deploy:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms-net
+    ports:
+      - "8012:8012"
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_gateway_1:oms.gateway-server
+      - oms_mysql_1:oms.storage-mysql-server
+      - oms_kafka_1:oms.mq-kafka-server
+  opeation-server:
+    image: kswapd/oms-operation:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    ports:
+      - "9679:9679"
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_gateway_1:oms.gateway-server
+      - oms_mysql_1:oms.storage-mysql-server
+      - oms_kafka_1:oms.mq-kafka-server
+  zipkin-server:
+    image: kswapd/oms-zipkin-server:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    #depends_on:
+    #  - alarm
+    ports:
+      - "9411:9411"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_eureka_1:oms.service-discovery-eureka-server
+      - oms_gateway_1:oms.gateway-server
+      - oms_mysql_1:oms.storage-mysql-server
+      - oms_elasticsearch_1:oms.storage-elasticsearch-server
+  zipkin-server-dependency:
+    image: kswapd/oms-zipkin-server-dependency:1.0
+    #network_mode: "bridge"
+    networks:
+      - oms_oms-net
+    #depends_on:
+    #  - alarm
+    #ports:
+    #  - "9411:9411"
+    #links:
+    #  - eureka:oms.service-discovery-eureka-server
+    external_links:
+      - oms_elasticsearch_1:oms.storage-elasticsearch-server
