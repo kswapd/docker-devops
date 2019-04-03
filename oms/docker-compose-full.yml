@@ -186,6 +186,7 @@ services:
     links:
       - eureka:oms.service-discovery-eureka-server
       - mysql:oms.storage-mysql-server
+      - gateway:oms.gateway-server
   log-server:
     image: kswapd/oms-log-server:1.0
     #network_mode: "bridge"
