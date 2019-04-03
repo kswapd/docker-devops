@@ -3,18 +3,8 @@ networks:
   oms-net:
     driver: bridge
 services:
-  portainer:
-    image: portainer/portainer
-    #network_mode: "bridge"
-    ports:
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - oms-net
   nginx:
     image: nginx:1.15
-    #network_mode: "bridge"
     networks:
       - oms-net
     depends_on:
@@ -27,6 +17,9 @@ services:
     volumes:
       - ./nginx/html:/usr/share/nginx/html
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.106
   mysql:
     image: mysql:5.7.25
     volumes:
@@ -36,20 +29,17 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=000000
     ports:
-      - "3307:3306"
+      - "3306:3306"
     networks:
       - oms-net
-
   zookeeper:
     image: zookeeper:3.4
-    #network_mode: "bridge"
     ports:
       - "3181:2181"
     networks:
       - oms-net
   elasticsearch:
     image: elasticsearch:5.6
-    #network_mode: "bridge"
     networks:
       - oms-net
     ports:
@@ -58,22 +48,14 @@ services:
     volumes:
       - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - /home/kxw/datas/es_data:/usr/share/elasticsearch/data
-      #environment:
-      #- discovery.type=single-node
-      #- cluster.name=elasticsearch
-      #- transport.host=0.0.0.0
-      #- http.host=0.0.0.0
-      #- discovery.zen.minimum_master_nodes=1
   redis:
     image: redis:4.0
-    #network_mode: "bridge"
     ports:
       - "6379:6379"
     networks:
       - oms-net
   kafka:
     image: wurstmeister/kafka:2.11-1.1.1
-    #network_mode: "bridge"
     networks:
       - oms-net
     ports:
@@ -83,12 +65,11 @@ services:
     links:
       - zookeeper:zk
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.107
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.106
       KAFKA_ADVERTISED_PORT: 9092
       KAFKA_ZOOKEEPER_CONNECT: zk:2181
   influxdb:
     image: influxdb:1.5.2
-    #network_mode: "bridge"
     volumes:
       - /home/kxw/datas/influxdb_data:/var/lib/influxdb
       - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
@@ -99,60 +80,14 @@ services:
       - INFLUXDB_ADMIN_ENABLED=true
     networks:
       - oms-net
-  logstash-online:
-    image: docker.elastic.co/logstash/logstash:5.6.8
-    #network_mode: "bridge"
-    volumes:
-      - ./logstash/logstash-online/galaxy-online.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/logstash-online/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/logstash-online/es-template/galaxy-online-template.json:/usr/share/logstash/es-template/galaxy-online-template.json
-      #environment:
-      #- PATH_CONFIG=/usr/share/logstash/pipeline
-      #- XPACK_MONITORING_ENABLED=false
-    depends_on:
-      - elasticsearch
-    links:
-      - elasticsearch:es
-    ports:
-      - "10515:10515"
-    networks:
-      - oms-net
-  logstash-batch:
-    image: docker.elastic.co/logstash/logstash:5.6.8
-    #network_mode: "bridge"
-    volumes:
-      - ./logstash/logstash-batch/galaxy-batch.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/logstash-batch/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/logstash-batch/es-template/galaxy-batch-template.json:/usr/share/logstash/es-template/galaxy-batch-template.json
-    depends_on:
-      - elasticsearch
-    links:
-      - elasticsearch:es
-    ports:
-      - "10516:10516"
-    networks:
-      - oms-net
-    #chronograf:
-    #image: quay.io/influxdb/chronograf:1.5.0.0
-    #network_mode: "bridge"
-    #ports:
-    #  - "8888:8888"
-  #Disable eureka, as if eureka server version is uncompatible with eureka client, client will report discovery heartbeat error."
-  #eureka:
-  #  image: springcloud/eureka
-  #  network_mode: "bridge"
-  #  ports:
-  #    - "8761:8761"
   eureka:
     image: kswapd/oms-eureka:1.0
-    #network_mode: "bridge"
     networks:
       - oms-net
     ports:
       - "9527:9527"
   gateway:
     image: kswapd/oms-gateway:1.0
-    #network_mode: "bridge"
     networks:
       - oms-net
     depends_on:
@@ -161,9 +96,11 @@ services:
       - "8081:8081"
     links:
       - eureka:oms.service-discovery-eureka-server
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.106
   auth:
     image: kswapd/oms-auth:1.0
-    #network_mode: "bridge"
     networks:
       - oms-net
     depends_on:
@@ -174,4 +111,7 @@ services:
       - eureka:oms.service-discovery-eureka-server
       - mysql:oms.storage-mysql-server
       - redis:oms.cache-redis-server
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.106
 

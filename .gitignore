@@ -3,4 +3,5 @@
 *.class
 *.log
 *.rdb
+oms/nginx/html/oms-ui
 

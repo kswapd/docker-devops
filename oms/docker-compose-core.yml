@@ -1,0 +1,44 @@
+version: "2"
+networks:
+  oms-net:
+    driver: bridge
+services:
+  portainer:
+    image: portainer/portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - oms-net
+  mysql:
+    image: mysql:5.7.25
+    volumes:
+      - /home/kxw/datas/mysql_data:/var/lib/mysql
+      - ./mysql:/etc/mysql/conf.d
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=000000
+    ports:
+      - "3306:3306"
+    networks:
+      - oms-net
+  zookeeper:
+    image: zookeeper:3.4
+    ports:
+      - "2181:2181"
+    networks:
+      - oms-net
+  redis:
+    image: redis:4.0
+    ports:
+      - "6379:6379"
+    networks:
+      - oms-net
+  eureka:
+    image: kswapd/oms-eureka:1.0
+    networks:
+      - oms-net
+    ports:
+      - "9527:9527"
+

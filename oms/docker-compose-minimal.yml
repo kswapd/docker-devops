@@ -1,0 +1,119 @@
+version: "2"
+networks:
+  oms-net:
+    driver: bridge
+services:
+  nginx:
+    image: nginx:1.15
+    networks:
+      - oms-net
+    depends_on:
+      - gateway
+    links:
+      - gateway:oms.gateway-server
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.126
+  mysql:
+    image: mysql:5.7.25
+    volumes:
+      - /home/kxw/datas/mysql_data:/var/lib/mysql
+      - ./mysql:/etc/mysql/conf.d
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=000000
+    ports:
+      - "3306:3306"
+    networks:
+      - oms-net
+  zookeeper:
+    image: zookeeper:3.4
+    ports:
+      - "2181:2181"
+    networks:
+      - oms-net
+  elasticsearch:
+    image: elasticsearch:5.6
+    networks:
+      - oms-net
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - /home/kxw/datas/es_data:/usr/share/elasticsearch/data
+  redis:
+    image: redis:4.0
+    ports:
+      - "6379:6379"
+    networks:
+      - oms-net
+  kafka:
+    image: wurstmeister/kafka:2.11-1.1.1
+    networks:
+      - oms-net
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    links:
+      - zookeeper:zk
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 10.88.2.126
+      KAFKA_ADVERTISED_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zk:2181
+  influxdb:
+    image: influxdb:1.5.2
+    volumes:
+      - /home/kxw/datas/influxdb_data:/var/lib/influxdb
+      - ./influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+    ports:
+      - "8086:8086"
+      - "8083:8083"
+    environment:
+      - INFLUXDB_ADMIN_ENABLED=true
+    networks:
+      - oms-net
+  eureka:
+    image: kswapd/oms-eureka:1.0
+    networks:
+      - oms-net
+    ports:
+      - "9527:9527"
+  gateway:
+    image: kswapd/oms-gateway:1.0
+    networks:
+      - oms-net
+    depends_on:
+      - eureka
+    ports:
+      - "8081:8081"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.126
+  auth:
+    image: kswapd/oms-auth:1.0
+    networks:
+      - oms-net
+    depends_on:
+      - eureka
+    ports:
+      - "8085:8085"
+    links:
+      - eureka:oms.service-discovery-eureka-server
+      - mysql:oms.storage-mysql-server
+      - redis:oms.cache-redis-server
+    environment:
+      - eureka.instance.preferIpAddress=true
+      - eureka.instance.ipAddress=10.88.2.126
+      - SPRING_DATASOURCE_USERNAME=kxw
+      - SPRING_DATASOURCE_PASSWORD=000000
+
