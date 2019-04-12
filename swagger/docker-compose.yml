@@ -1,0 +1,13 @@
+version: "2"
+networks:
+  swagger-net:
+    driver: bridge
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui 
+    environment:
+            URLS: '[{url:"http://10.88.2.106:9527/v2/api-docs", name:"erueka"},{url: "https://petsotre.swagger.io/v2/swagger.json", name: "pet"},{url: "http://generator.swagger.io/api/swagger.json", name: "gen"}]'
+    ports:
+      - "9999:8080"
+    networks:
+      - swagger-net
