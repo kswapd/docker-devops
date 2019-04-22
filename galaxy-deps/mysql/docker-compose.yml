@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  apollo-db:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_ROOT_PASSWORD: "000000"
+    network_mode: "bridge"
+    ports:
+      - "3306:3306"
+    volumes:
+      - /home/kxw/datas/mysql_data:/var/lib/mysql
