@@ -1,0 +1,57 @@
+version: "2"
+networks:
+  mq-net:
+    driver: bridge
+services:
+  rabbit1:
+    container_name: rabbit1
+    hostname: rabbit1
+    image: rabbitmq:3.7.14-management-alpine
+    volumes:
+      - /home/kxw/datas/rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitcluster
+      #- RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-setcookie rabbitcluster"
+    ports:
+      - "30000:5672"
+      - "30001:15672"
+    networks:
+      - mq-net
+  rabbit2:
+    container_name: rabbit2
+    hostname: rabbit2
+    image: rabbitmq:3.7.14-management-alpine
+    volumes:
+      - /home/kxw/datas/rabbitmq_data2:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitcluster
+      #- RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-setcookie rabbitcluster"
+    ports:
+      - "30002:5672"
+      - "30003:15672"
+    networks:
+      - mq-net
+    depends_on:
+      - rabbit1
+    links:
+      - rabbit1:rabbit1
+  rabbit3:
+    container_name: rabbit3
+    hostname: rabbit3
+    image: rabbitmq:3.7.14-management-alpine
+    volumes:
+      - /home/kxw/datas/rabbitmq_data3:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_ERLANG_COOKIE=rabbitcluster
+      #- RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS="-setcookie rabbitcluster"
+    ports:
+      - "30004:5672"
+      - "30005:15672"
+    networks:
+      - mq-net
+    depends_on:
+      - rabbit1
+      - rabbit2
+    links:
+      - rabbit1:rabbit1
+      - rabbit2:rabbit2
