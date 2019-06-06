@@ -1,0 +1,50 @@
+version: "2"
+networks:
+  jenkins-net:
+    driver: bridge
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    volumes:
+      - /home/kxw/datas/jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7
+      - /home/kxw/dev/elk/jdk1.8.0_112:/home/host-apps/jdk
+      - /home/kxw/soft/apache-maven-3.5.3:/home/host-apps/maven
+      - /home/kxw/datas/maven_data/repository:/home/kxw/datas/maven_data/repository
+    #environment:
+    #  - MYSQL_ROOT_PASSWORD=000000
+    ports:
+      - "9080:8080"
+      - "50000:50000"
+    networks:
+      - jenkins-net
+    links:
+      - gitlab:oms.gitlab-server
+  gitlab:
+    image: gitlab/gitlab-ce:11.11.0-ce.0
+    volumes:
+      - /home/kxw/datas/gitlab_data/config:/etc/gitlab
+      - /home/kxw/datas/gitlab_data/logs:/var/log/gitlab
+      - /home/kxw/datas/gitlab_data/data:/var/opt/gitlab
+    ports:
+      - "9433:443"
+      - "9081:80"
+      - "9022:22"
+    networks:
+      - jenkins-net
+    #links:
+    #  - jenkins:oms.jenkins-server
+    #external_links:
+    #  - oms_eureka_1:oms.service-discovery-eureka-server
+    extra_hosts:
+       - "oms.jenkins-server:10.88.2.126"
+  registry:
+    image: registry:2.7
+    ports:
+      - 5000:5000
+    volumes:
+      - /home/kxw/datas/registry_data:/var/lib/registry
+    networks:
+      - jenkins-net
